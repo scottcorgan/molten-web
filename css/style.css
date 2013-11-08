@@ -153,3 +153,7 @@ pre, code{
 .example .dark > div{
   padding:20px;
 }
+
+section.content{
+  -webkit-overflow-scrolling:touch;
+}

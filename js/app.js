@@ -1,13 +1,18 @@
 (function () {
   
-  var $nav = $('.main > nav');
-  var $navWrapper = $nav.find('> ul');
-  var navHeight = $navWrapper.outerHeight();
+  function positionNav () {
+    var $nav = $('.main > nav');
+    var $navWrapper = $nav.find('> ul');
+    var navHeight = $navWrapper.outerHeight();
+    
+    $navWrapper.css({
+      position:'absolute',
+      top: $nav.outerHeight()/2 - navHeight/2
+    });
+  }
   
-  $navWrapper.css({
-    position:'absolute',
-    top: $nav.outerHeight()/2 - navHeight/2
-  });
+  $(window).resize(function () { positionNav(); });
+  positionNav();
   
   var triggers = [];
   
