@@ -46,10 +46,17 @@
     });
   });
   
+  // TODO: make this more generic and BETTER
   $('section.content').scroll(function () {
-    if ($('section.content').scrollTop() < 100) {
+    var $content = $('section.content');
+    
+    if ($content.scrollTop() < 100) {
       $('#navbar .nav li.active').removeClass('active');
       $('#navbar a[href=#download]').parent().addClass('active');
+    }
+    else if ($content.scrollTop() >= ($content[0].scrollHeight-780)) {
+      $('#navbar .nav li.active').removeClass('active');
+      $('#navbar a[href=#browser-support]').parent().addClass('active');
     }
     else{
       $.each(triggers, function (idx, elId) {
