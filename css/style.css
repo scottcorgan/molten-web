@@ -120,6 +120,8 @@ h4{
 
 .button-download{
   border-color:#5EB95E;
+  color:#5EB95E;
+  font-weight:500;
 }
 
 pre, code{

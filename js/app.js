@@ -1,6 +1,11 @@
 (function summary () {
   var Summary = {
+    _scrollFromTopPaddingFix: 100,
+    _scrollHeightPaddingFix: $(document).height() + 50,
+    
     triggers: [],
+    $firstSection: null,
+    $lastSection: null,
     
     $window: $(window),
     $sectionsWrapper: $('.sections-wrapper'),
@@ -10,11 +15,13 @@
     navWrapperOuterHeight: 0,
     
     init: function () {
-      this.$sections.each(this.sectionSetup);
-      this.$sectionsWrapper.on('scroll', this.sectionsScroll);
-      this.$window.on('resize', this.positionNav);
-      this.positionNav();
-      this.$sectionsWrapper.trigger('scroll');
+      Summary.$sections.each(Summary.sectionSetup);
+      
+      Summary.$sectionsWrapper.on('scroll', Summary.sectionsScroll);
+      Summary.$window.on('resize', Summary.positionNav);
+      
+      Summary.positionNav();
+      Summary.$sectionsWrapper.trigger('scroll');
     }
   };
   
@@ -24,16 +31,20 @@
   
   Summary.sectionSetup = function (idx, el) {
     var $el = $(el);
-    var href = '#' + $el.attr('id');
-    var $navItem = $('<li><a href="' + href + '">' + $el.attr('title') + '</a></li>');
+    var elId = $el.attr('id');
+    var href = '#' + elId;
+    var $navItem = $('<li class="summary-' + elId + '""><a href="' + href + '">' + $el.attr('title') + '</a></li>');
     var $clickable = $navItem.find('a');
     
-    Summary.triggers.push(href);
+    Summary.triggers.push(elId);
     
     $clickable.on('click', function (e) {
       e.preventDefault();
       Summary.$sectionsWrapper.scrollTo(href);
     });
+    
+    if (idx === 0) Summary.$firstSection = $navItem;
+    if (Summary.$sections.length - 1 === idx) Summary.$lastSection = $navItem;
     
     Summary.$navWrapper.append($navItem);
     Summary.navWrapperOuterHeight = Summary.$navWrapper.outerHeight();
@@ -42,21 +53,22 @@
   Summary.sectionsScroll = function() {
     var $content = Summary.$sectionsWrapper;
     var $activeLi = $('#navbar .nav li.active');
-    if ($content.scrollTop() < 100) {
+    
+    if ($content.scrollTop() < Summary._scrollFromTopPaddingFix) {
       $activeLi.removeClass('active');
-      $('#navbar a[href=#download]').parent().addClass('active');
+      Summary.$firstSection.addClass('active');
     }
-    else if ($content.scrollTop() >= ($content[0].scrollHeight-780)) {
+    else if ($content.scrollTop() >= ($content[0].scrollHeight - Summary._scrollHeightPaddingFix)) {
       $activeLi.removeClass('active');
-      $('#navbar a[href=#browser-support]').parent().addClass('active');
+      Summary.$lastSection.addClass('active');
     }
     else{
       $.each(Summary.triggers, function (idx, elId) {
-        var top = $(elId).offset().top;
+        var elOffsetTop = $('#' + elId).offset().top;
         
-        if (top > 0 && top < 200) {
+        if (elOffsetTop > 0 && elOffsetTop < 200) {
           $activeLi.removeClass('active');
-          $('#navbar a[href=' + elId + ']').parent().addClass('active');
+          $('li.summary-' + elId).addClass('active');
         }
       });
     }
