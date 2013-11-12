@@ -1,72 +1,66 @@
-(function () {
-  
-  function positionNav () {
-    var $nav = $('.main > nav');
-    var $navWrapper = $nav.find('> ul');
-    var navHeight = $navWrapper.outerHeight();
+(function summary () {
+  var Summary = {
+    triggers: [],
     
-    $navWrapper.css({
-      position:'absolute',
-      top: $nav.outerHeight()/2 - navHeight/2
-    });
-  }
-  
-  $(window).resize(function () { positionNav(); });
-  positionNav();
-  
-  var triggers = [];
-  
-  $.fn.scrollTo = function( target, options, callback ){
-    if(typeof options == 'function' && arguments.length == 2){ callback = options; options = target; }
-    var settings = $.extend({
-    scrollTarget  : target,
-    offsetTop     : 0,
-    duration      : 200,
-    easing        : 'swing'
-    }, options);
-    return this.each(function(){
-    var scrollPane = $(this);
-    var scrollTarget = (typeof settings.scrollTarget == "number") ? settings.scrollTarget : $(settings.scrollTarget);
-    var scrollY = (typeof scrollTarget == "number") ? scrollTarget : scrollTarget.offset().top + scrollPane.scrollTop() - settings.offsetTop;
-    scrollPane.animate({scrollTop : scrollY }, settings.duration, settings.easing, function(){
-      if (typeof callback == 'function') { callback.call(this); }
-    });
-    });
-  }
-  
-  $('#navbar .nav li a').each(function (idx, el) {
-    triggers.push($(el).attr('href'));
+    $window: $(window),
+    $sectionsWrapper: $('.sections-wrapper'),
+    $sections: $('.section'),
+    $nav: $('.main > nav'),
+    $navWrapper: $('.main > nav > ul'),
+    navWrapperOuterHeight: 0,
     
+    init: function () {
+      this.$sections.each(this.sectionSetup);
+      this.$sectionsWrapper.on('scroll', this.sectionsScroll);
+      this.$window.on('resize', this.positionNav);
+      this.positionNav();
+      this.$sectionsWrapper.trigger('scroll');
+    }
+  };
+  
+  Summary.positionNav = function () {
+    Summary.$navWrapper.css('top', Summary.$nav.outerHeight()/2 - Summary.navWrapperOuterHeight/2);
+  };
+  
+  Summary.sectionSetup = function (idx, el) {
     var $el = $(el);
+    var href = '#' + $el.attr('id');
+    var $navItem = $('<li><a href="' + href + '">' + $el.attr('title') + '</a></li>');
+    var $clickable = $navItem.find('a');
     
-    $el.click(function (e) {
+    Summary.triggers.push(href);
+    
+    $clickable.on('click', function (e) {
       e.preventDefault();
-      var id = $el.attr('href');
-      $('section.content').scrollTo(id);
+      Summary.$sectionsWrapper.scrollTo(href);
     });
-  });
-  
-  // TODO: make this more generic and BETTER
-  $('section.content').scroll(function () {
-    var $content = $('section.content');
     
+    Summary.$navWrapper.append($navItem);
+    Summary.navWrapperOuterHeight = Summary.$navWrapper.outerHeight();
+  };
+  
+  Summary.sectionsScroll = function() {
+    var $content = Summary.$sectionsWrapper;
+    var $activeLi = $('#navbar .nav li.active');
     if ($content.scrollTop() < 100) {
-      $('#navbar .nav li.active').removeClass('active');
+      $activeLi.removeClass('active');
       $('#navbar a[href=#download]').parent().addClass('active');
     }
     else if ($content.scrollTop() >= ($content[0].scrollHeight-780)) {
-      $('#navbar .nav li.active').removeClass('active');
+      $activeLi.removeClass('active');
       $('#navbar a[href=#browser-support]').parent().addClass('active');
     }
     else{
-      $.each(triggers, function (idx, elId) {
+      $.each(Summary.triggers, function (idx, elId) {
         var top = $(elId).offset().top;
         
         if (top > 0 && top < 200) {
-          $('#navbar .nav li.active').removeClass('active');
+          $activeLi.removeClass('active');
           $('#navbar a[href=' + elId + ']').parent().addClass('active');
         }
       });
     }
-  });
+  };
+  
+  Summary.init();
 }());
